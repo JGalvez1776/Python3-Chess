@@ -8,13 +8,15 @@ from board import *
 
 # TODO:
 #   Make the while loop more user friendly to use (Add "back", "help", etc)
-#   Implement en passant, pawn promotion
+#   Implement en passant
 #   Add checkmate to allow the game to end. (Requires adding check too)
 #   Make a way to display the board using graphics
-#   Allow Pawn promotions when it reaches the end of the board
-#   Optimization Thing: Check if the pawn moves can instead just be a single tuple
-#       Rather than a list containing a single tuple
 
+# TODO: add check
+#   To add check maybe clone current board, make the move (To confirm self isn't in check
+#   then check if opponent is in check. Have the original board now point to the clone
+#   Trashing the original board and any pieces no longer on the board.
+#
 def main():
     board = create_standard_board()
     column_string = 'abcdefghijklmnopqrstuvwxyz'[:board.get_wid()]
