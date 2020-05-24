@@ -16,7 +16,7 @@ from board import *
 #   To add check maybe clone current board, make the move (To confirm self isn't in check
 #   then check if opponent is in check. Have the original board now point to the clone
 #   Trashing the original board and any pieces no longer on the board.
-#
+
 def main():
     board = create_standard_board()
     column_string = 'abcdefghijklmnopqrstuvwxyz'[:board.get_wid()]
