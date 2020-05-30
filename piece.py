@@ -10,16 +10,36 @@ class Piece:
         self._moves = move_list
         self._team = name[0]
         self._position = None
-        self._never_moved = True
-        # self._special_moves = special_moves
         self._valid_moves = []
         self._type = type
+        if type in ['Pawn', 'Rook', 'King']:
+            self._never_moved = True
+            if type == 'Pawn':
+                self._special_moves = []
 
     def __str__(self):
         return self._name
 
     def update_position(self, x, y):
         self._position = (x, y)
+
+    def reset_special_moves(self):
+        '''
+        special_moves is where en passante moves gets stored.
+        '''
+        if self.get_type() != 'Pawn':
+            return
+        self._special_moves = []
+
+    def get_special_moves(self):
+        if self.get_type() != 'Pawn':
+            return False
+        return self._special_moves
+
+    def add_special_moves(self, move):
+        if self.get_type() != 'Pawn':
+            return
+        self._special_moves.append(move)
 
     def get_moves(self):
         return self._moves
@@ -121,8 +141,8 @@ def check_pawn_moves(board, piece, x, y, wid, hei):
     for new_move in [(x_pos, move[1]) for x_pos in [-1, 1]]:
         if piece.is_valid_move(new_move, board, x, y, wid, hei):
             piece.add_move((x + new_move[0], y + new_move[1]))
-
-    # TODO ADD EN PASSANT HERE
+    for move in piece.get_special_moves():
+        piece.add_move(move)
     return  # Once this is finished check if this return is even needed
 
 
