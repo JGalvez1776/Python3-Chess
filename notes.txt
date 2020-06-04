@@ -1,0 +1,9 @@
+TODO:
+See if there are any other configs to add and implement them.
+Make the help option print out useful information or decide if that is even needed.
+Implement check and checkmate:
+	To do this look into implementing "vision" for the king piece to determine
+	if a piece if checking it. 
+After implementing check have find_moves() check if moves are valid 
+IE: Make a new board and check if the move results in the current player's king being in check.
+This is just to make sure that one doesn't make a move that results in them checking themself.
