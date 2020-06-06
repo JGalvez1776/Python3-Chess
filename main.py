@@ -21,7 +21,8 @@ def main():
         print(f'Current Player: {team}')
         board.print()
         action = input('Select Piece:\n')
-
+        if action == "exit":
+            break
         # Checks for potential errors in the input
         if find_error(action, column_string, numbers, board):
             continue
@@ -42,6 +43,8 @@ def main():
               f'{[f"{column_string[move[0]].upper()}{move[1] + 1}" for move in valid_move]}')
 
         move = input('Select Move:\n')
+        if action == "exit":
+            break
         if find_error(move, column_string, numbers, board):
             continue
 
