@@ -134,6 +134,7 @@ def row(y):
 def create_standard_board():
     board = Board(8, 8)
     moves = generate_standard_moves()
+    # return test_board(board, moves)
     board.fill_row('B', 'Pawn', 6)
     board.place(generate_piece('B', 'Rook', moves), 0, 7)
     board.place(generate_piece('B', 'Knight', moves), 1, 7)
@@ -145,7 +146,6 @@ def create_standard_board():
     board.place(generate_piece('B', 'Rook', moves), 7, 7)
 
     board.fill_row('W', 'Pawn', 1)
-    board.place(generate_piece('W', 'Pawn'), 3, 4)
     board.place(generate_piece('W', 'Rook', moves), 0, 0)
     board.place(generate_piece('W', 'Knight', moves), 1, 0)
     board.place(generate_piece('W', 'Bishop', moves), 2, 0)
@@ -156,4 +156,17 @@ def create_standard_board():
     board.place(generate_piece('W', 'Rook', moves), 7, 0)
 
     board.find_all_moves()
+    return board
+
+
+def test_board(board, moves):
+    '''
+    This is purely for debugging remove once project is finished
+    '''
+    board.place(generate_piece('B', 'King', moves), 4, 7)
+    board.place(generate_piece('W', 'King', moves), 4, 0)
+    board.place(generate_piece('W', 'Queen', moves), 3, 0)
+    board.place(generate_piece('W', 'Pawn', moves), 4, 1)
+    board.find_all_moves()
+
     return board

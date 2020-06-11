@@ -16,6 +16,9 @@ class Piece:
             self._never_moved = True
             if type == 'Pawn':
                 self._special_moves = []
+            elif type == 'King':
+                self._in_check = False
+                self._vision = create_vision()
 
     def __str__(self):
         return self._name
@@ -129,6 +132,74 @@ class Piece:
                 return False
             return not same_team
 
+    def get_check_status(self):
+        return self._in_check
+
+    def determine_check(self, board):
+        if self.get_type() != 'King':
+            print('A non king was used')
+            return
+        status = self.update_check_status(board)
+        if status:
+            self.change_check_status(True)
+        else:
+            self.change_check_status(False)
+
+    def change_check_status(self, data):
+        self._in_check = data
+
+    def update_check_status(self, board):
+
+        vision = self.get_vision()
+        king_location = self.get_position()
+        check_pieces = ['Rook Queen', 'Bishop Queen', 'Knight']
+        i = 0
+        index = 0
+        dimensions = [board.get_wid() - 1, board.get_hei() - 1]
+        for move_set in vision:
+            piece_that_checks = check_pieces[index]
+            if type(move_set) == list:
+                for move in move_set:
+                    status = determine_if_checks(board, self, king_location, move,
+                                                 piece_that_checks, dimensions)
+                    if status is False:
+                        break
+                    if status is True:
+                        return True
+            else:
+                assert type(move_set) == tuple
+                status = determine_if_checks(board, self, king_location, move_set,
+                                             piece_that_checks, dimensions)
+                if status is True:
+                    return True
+            i += 1
+            if i % 4 == 0 and index != 2:
+                index += 1
+        return False
+
+        # TODO Make this check if a king is in check
+
+    def get_vision(self):
+        return self._vision
+
+
+def determine_if_checks(board, king, king_location, move, required_type, dimensions):
+    x = king_location[0]
+    y = king_location[1]
+    wid = dimensions[0]
+    hei = dimensions[1]
+    if x + move[0] < 0 or x + move[0] > wid or y + move[1] < 0 or y + move[1] > hei:
+        return False
+    piece = board.get_square(x + move[0], y + move[1])
+    team = king.get_team()
+    if team == 'W' and abs(move[0]) == 1 and move[1] == 1:
+        required_type += ' Pawn'
+    if team == 'B' and abs(move[0]) == 1 and move[1] == -1:
+        required_type += ' Pawn'
+    if piece is None:
+        return None
+    return piece.get_type() in required_type and piece.get_team() != team
+
 
 def check_pawn_moves(board, piece, x, y, wid, hei):
     move = piece.get_moves()[0]
@@ -143,7 +214,7 @@ def check_pawn_moves(board, piece, x, y, wid, hei):
             piece.add_move((x + new_move[0], y + new_move[1]))
     for move in piece.get_special_moves():
         piece.add_move(move)
-    return  # Once this is finished check if this return is even needed
+    return  # TODO: Once this is finished check if this return is even needed
 
 
 def generate_piece(team, piece, moves=[]):
@@ -232,3 +303,16 @@ def castle(board, direction, king_location):
         rook_x = 7
     board.move(4, y_level, 4 + shift, y_level)
     board.move(rook_x, y_level, 4 + (shift // 2), y_level)
+
+
+def create_vision():
+    vision = [[(x, 0) for x in range(1, 8)],
+              [(x, 0) for x in range(-1, -8, -1)],
+              [(0, y) for y in range(-1, -8, -1)],
+              [(0, y) for y in range(1, 8)]] + \
+             [[(x, x) for x in range(-1, -8, -1)],
+              [(x, x) for x in range(1, 8)],
+              [(x, -x) for x in range(-1, -8, -1)],
+              [(x, -x) for x in range(1, 8)]] + \
+             [(x, y) for x in [-1, 1, -2, 2] for y in [-1, 1, -2, 2] if abs(x) != abs(y)]
+    return vision

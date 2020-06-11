@@ -17,7 +17,13 @@ def main():
     column_string = 'abcdefghijklmnopqrstuvwxyz'[:board.get_wid()]
     numbers = range(1, board.get_hei() + 1)
     team = 'White'
+    kings = [board.get_square(4, 0), board.get_square(4, 7)]
     while True:
+        for piece in kings:
+            piece.determine_check(board)
+            if piece.get_check_status():
+                print('CHECK')
+
         print(f'Current Player: {team}')
         board.print()
         action = input('Select Piece:\n')
@@ -56,7 +62,6 @@ def main():
 
         handle_move(board, piece, start, move)
         board.update_kings_locations()
-        print(board.get_kings_locations())
         if team == 'White':
             team = 'Black'
         else:
