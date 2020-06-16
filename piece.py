@@ -3,6 +3,8 @@
     Description:
 """
 
+from utils import *
+
 
 class Piece:
     def __init__(self, name, move_list, type):
