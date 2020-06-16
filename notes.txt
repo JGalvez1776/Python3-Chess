@@ -7,6 +7,7 @@ TODO:
     After implementing check have find_moves() check if moves are valid
     IE: Make a new board and check if the move results in the current player's king being in check.
     This is just to make sure that one doesn't make a move that results in them checking themself.
+    Add a way of taking in a file or string and converting it into a board (Allows saving game)
 
 
 Check Implementation Checklist:
