@@ -1,4 +1,4 @@
-def handle_move(board, piece, start, move):
+def handle_move(board, piece, start, move, team):
     # Handles castling
     if piece.get_type() == 'King' and \
             (int(move[0]) == piece.get_position()[0] - 2 or
@@ -27,10 +27,9 @@ def handle_move(board, piece, start, move):
             else:
                 print('Only input one from "Queen", "Rook", "Bishop", or "Knight"')
     board.check_en_pasante(piece, start, move)
-    board.find_all_moves()
+    board.find_all_moves(team[0])
     piece.reset_special_moves()
     return
-
 
 
 def handle_special_moves(board, piece, start, move):

@@ -18,11 +18,12 @@ def main():
     numbers = range(1, board.get_hei() + 1)
     team = 'White'
     kings = [board.get_square(4, 0), board.get_square(4, 7)]
+    teams = ['W', 'B']
     while True:
-        for piece in kings:
-            piece.determine_check(board)
-            if piece.get_check_status():
-                print('CHECK')
+        index = teams.index(team[0])
+        kings[index].handle_check(board)
+        if kings[index].get_check_status():
+            print('CHECK')
 
         print(f'Current Player: {team}')
         board.print()
@@ -59,13 +60,12 @@ def main():
         if move not in piece.get_valid_moves():
             display_error('Invalid Move')
             continue
-
-        handle_move(board, piece, start, move)
-        board.update_kings_locations()
         if team == 'White':
             team = 'Black'
         else:
             team = 'White'
+        handle_move(board, piece, start, move, team)
+        board.update_kings_locations()
 
 
 def find_error(data, column_string, numbers, board):
@@ -87,10 +87,6 @@ def display_error(msg):
     print('Error:')
     print(msg)
     print('-' * 20)
-
-
-
-
 
 
 if __name__ == '__main__':

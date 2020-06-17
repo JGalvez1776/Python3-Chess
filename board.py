@@ -13,7 +13,16 @@ class Board:
         self._hei = hei
         for i in range(wid):
             self._board[i] = [None] * wid
+        # Check if the kings location is even being used.
         self._kings_locations = None
+
+    def copy(self):
+        board = self.get_board()
+        new_board = Board(self.get_wid(), self.get_hei())
+        for y in range(len(board)):
+            for x in range(len(board[y])):
+                new_board._board[y][x] = board[y][x]
+        return new_board
 
     def print(self):
         board = self.get_board()
@@ -48,10 +57,15 @@ class Board:
         Assumes that a move is valid given coordinates
         '''
         piece = self.get_square(x1, y1)
-        piece.update_move_status()
         self.place(piece, x2, y2)
         self.place(None, x1, y1)
-        # self.find_all_moves()
+        piece.update_move_status()
+
+    def raw_move(self, start, end):
+        piece = self.get_square(start[0], start[1])
+
+        self._board[row(start[1])][start[0]] = None
+        self._board[row(end[1])][end[0]] = piece
 
     def get_square(self, x, y):
         return self._board[row(y)][x]
@@ -74,11 +88,11 @@ class Board:
             board[y][i] = pawn
             pawn.update_position(i, old_y)
 
-    def find_all_moves(self):
+    def find_all_moves(self, team):
         board = self.get_board()
         for row in board:
             for square in row:
-                if square is None:
+                if square is None or square.get_team() != team:
                     continue
                 pos = square.get_position()
                 square.find_moves(self, pos[0], pos[1])
@@ -93,14 +107,15 @@ class Board:
         self.set_kings_locations(locations)
 
     def check_en_pasante(self, old_piece, start, move):
-        if old_piece is None or old_piece.get_type() in ['King', 'Queen', 'Rook', 'Bishop', 'Knight']:
+        if old_piece is None or old_piece.get_type() in ['King', 'Queen', 'Rook', 'Bishop',
+                                                         'Knight']:
             return
         if (move[1] - start[1]) % 2 == 0:
             items = [(-1, 0), (1, 0)]
             for elem in items:
                 piece = self.get_square(move[0] + elem[0], move[1] + elem[1])
                 if piece is None or \
-                   piece.get_type() in ['King', 'Queen', 'Rook', 'Bishop', 'Knight']:
+                        piece.get_type() in ['King', 'Queen', 'Rook', 'Bishop', 'Knight']:
                     continue
                 if piece.get_team() != old_piece.get_team():
                     new_move = generate_en_pasante_move(self, old_piece, piece)
@@ -111,6 +126,17 @@ class Board:
 
     def get_kings_locations(self):
         return self._kings_locations
+
+    def get_piece(self, type, team):
+        board = self.get_board()
+        for y in range(len(board)):
+            for x in range(len(board[y])):
+                piece = board[y][x]
+                if piece is None:
+                    continue
+                if piece.get_type() == type and piece.get_team() == team:
+                    return piece
+        assert False, 'Piece is not found'
 
 
 def generate_en_pasante_move(board, old_piece, piece):
@@ -123,7 +149,6 @@ def generate_en_pasante_move(board, old_piece, piece):
     location = piece.get_position()
     new_location = (old_location[0], location[1] + change)
     return new_location
-
 
 
 def row(y):
@@ -155,7 +180,7 @@ def create_standard_board():
     board.place(generate_piece('W', 'Knight', moves), 6, 0)
     board.place(generate_piece('W', 'Rook', moves), 7, 0)
 
-    board.find_all_moves()
+    board.find_all_moves('W')
     return board
 
 

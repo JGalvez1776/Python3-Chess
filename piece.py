@@ -61,8 +61,7 @@ class Piece:
     def get_team(self):
         return self._team
 
-    def add_move(self, move):
-        self._valid_moves.append(move)
+    # ADD MOVE WAS ORIGINALLY HERE
 
     def get_position(self):
         return self._position
@@ -96,17 +95,19 @@ class Piece:
         castle_moves = self.find_castles(board, x, y, wid, hei)
         if castle_moves:
             for move in castle_moves:
-                self.add_move(move)
+                # Here I want to implement code to prevent the move from being added if the king
+                # moves over check or into check.
+                self.add_move(move, board)
 
         for move in self.get_moves():
             if type(move) == list:
                 for elem in move:
                     if self.is_valid_move(elem, board, x, y, wid, hei):
-                        self.add_move((x + elem[0], y + elem[1]))
+                        self.add_move((x + elem[0], y + elem[1]), board)
                     else:
                         break
             elif self.is_valid_move(move, board, x, y, wid, hei):
-                self.add_move((x + move[0], y + move[1]))
+                self.add_move((x + move[0], y + move[1]), board)
 
     def is_valid_move(self, move, board, x, y, wid, hei):
         if x + move[0] < 0 or x + move[0] > wid or y + move[1] < 0 or y + move[1] > hei:
@@ -130,59 +131,92 @@ class Piece:
 
             same_team = self.get_team() == square.get_team()
             if not same_team:
-                self.add_move((x + move[0], y + move[1]))
+                self.add_move((x + move[0], y + move[1]), board)
                 return False
             return not same_team
 
     def get_check_status(self):
         return self._in_check
 
-    def determine_check(self, board):
+    def handle_check(self, board):
         if self.get_type() != 'King':
             print('A non king was used')
             return
-        status = self.update_check_status(board)
-        if status:
-            self.change_check_status(True)
-        else:
-            self.change_check_status(False)
+        status = self.determine_check(board)
+        self.change_check_status(status)
 
-    def change_check_status(self, data):
-        self._in_check = data
-
-    def update_check_status(self, board):
-
+    def determine_check(self, board):
         vision = self.get_vision()
-        king_location = self.get_position()
+        location = self.get_position()
         check_pieces = ['Rook Queen', 'Bishop Queen', 'Knight']
         i = 0
         index = 0
         dimensions = [board.get_wid() - 1, board.get_hei() - 1]
+
+        #if determine_pawn_check(board, self, location):
+        #    return True
+
         for move_set in vision:
-            piece_that_checks = check_pieces[index]
+            cur_piece = check_pieces[index]
             if type(move_set) == list:
                 for move in move_set:
-                    status = determine_if_checks(board, self, king_location, move,
-                                                 piece_that_checks, dimensions)
-                    if status is False:
-                        break
-                    if status is True:
+                    status = determine_if_checks(board, self, location, move, cur_piece, dimensions)
+                    if status:
                         return True
+                    if status is None:
+                        continue
+                    break
             else:
-                assert type(move_set) == tuple
-                status = determine_if_checks(board, self, king_location, move_set,
-                                             piece_that_checks, dimensions)
-                if status is True:
+                assert type(move_set) == tuple, 'The type is not a tuple'
+                status = determine_if_checks(board, self, location, move_set, cur_piece, dimensions)
+                if status:
                     return True
             i += 1
-            if i % 4 == 0 and index != 2:
+            if i % 4 == 0 and index < 2:
                 index += 1
         return False
 
-        # TODO Make this check if a king is in check
+    def change_check_status(self, data):
+        self._in_check = data
 
     def get_vision(self):
         return self._vision
+
+    def add_move(self, move, board):
+        '''
+        Checks that a move does not check oneself before adding it to a pieces legal moves
+        '''
+        if determine_if_self_checks(board, self, move):
+            return
+        self._valid_moves.append(move)
+
+# If pawn checks don't work
+#def determine_pawn_check(board, piece, location):
+#    team = piece.get_team()
+
+
+def determine_if_self_checks(board, piece, move):
+    new_board = board.copy()
+    location = piece.get_position()
+    team = piece.get_team()[0]
+
+    if piece.get_type() == 'King':
+        shadow_king = empty_king(team)
+        new_board.place(shadow_king, location[0], location[1])
+
+        new_board.raw_move(location, move)
+
+        shadow_king.update_position(move[0], move[1])
+
+        status = shadow_king.determine_check(new_board)
+        return status
+
+    new_board.raw_move(location, move)
+    king = board.get_piece('King', team)
+    status = king.determine_check(new_board)
+
+
+    return status
 
 
 def determine_if_checks(board, king, king_location, move, required_type, dimensions):
@@ -190,6 +224,7 @@ def determine_if_checks(board, king, king_location, move, required_type, dimensi
     y = king_location[1]
     wid = dimensions[0]
     hei = dimensions[1]
+
     if x + move[0] < 0 or x + move[0] > wid or y + move[1] < 0 or y + move[1] > hei:
         return False
     piece = board.get_square(x + move[0], y + move[1])
@@ -206,16 +241,16 @@ def determine_if_checks(board, king, king_location, move, required_type, dimensi
 def check_pawn_moves(board, piece, x, y, wid, hei):
     move = piece.get_moves()[0]
     if piece.is_valid_move(move, board, x, y, wid, hei):
-        piece.add_move((x + move[0], y + move[1]))
+        piece.add_move((x + move[0], y + move[1]), board)
         new_move = (move[0], move[1] * 2)
         if piece.is_valid_move(new_move, board, x, y, wid, hei) and piece.has_never_moved() == \
                 True:
-            piece.add_move((x + new_move[0], y + new_move[1]))
+            piece.add_move((x + new_move[0], y + new_move[1]), board)
     for new_move in [(x_pos, move[1]) for x_pos in [-1, 1]]:
         if piece.is_valid_move(new_move, board, x, y, wid, hei):
-            piece.add_move((x + new_move[0], y + new_move[1]))
+            piece.add_move((x + new_move[0], y + new_move[1]), board)
     for move in piece.get_special_moves():
-        piece.add_move(move)
+        piece.add_move(move, board)
     return  # TODO: Once this is finished check if this return is even needed
 
 
@@ -261,6 +296,11 @@ def bishop(team, moves):
 
 def queen(team, moves):
     return Piece(team + ' Que', moves['Queen'], 'Queen')
+
+
+def empty_king(team):
+    # TODO: When done see if the move list can just be blank
+    return Piece(team + ' Kng', [(x, y) for x in [-1, 0, 1] for y in [-1, 0, 1] if x != 0 or y != 0], 'King')
 
 
 def generate_standard_moves():
