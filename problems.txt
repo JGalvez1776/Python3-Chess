@@ -1,0 +1,6 @@
+Stuff that is broken:
+    En pasantes seem to be broken by applying the message on all pawn captures
+
+Problems that now look promising (require more testing):
+    Other pieces can move to put yourself into check
+    King can move into a square that checks itself
