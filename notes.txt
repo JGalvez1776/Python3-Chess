@@ -1,17 +1,9 @@
 TODO:
     Make the help option print out useful information or decide if that is even needed.
-    Make a Utils program to contain random assortec functions in piece.py
-    Implement check and checkmate:
-        To do this look into implementing "vision" for the king piece to determine
-        if a piece if checking it.
-    After implementing check have find_moves() check if moves are valid
-    IE: Make a new board and check if the move results in the current player's king being in check.
-    This is just to make sure that one doesn't make a move that results in them checking themself.
+    Organize loose functions into utils and maybe a standard_board.py
+    Test the check functionality to make sure it works
+        Add Checking preventing functionality
     Add a way of taking in a file or string and converting it into a board (Allows saving game)
-
-
-Check Implementation Checklist:
-    Give both kings vision to see if they are in check
-    Make it so that the determinant for the game to continue is if the current player has at least
-    1 valid move. No moves means it is either a draw or currently player is checkmated.
-    Have every checked move have to determine if it'd put the current player in checkmate.
+    Make it so that pawns can check the king. Look into this and confirm if even a problem
+    In the while loop instead of True have it be a function that returns True only if the current
+    player has valid moves they can make.
