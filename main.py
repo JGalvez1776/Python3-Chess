@@ -1,6 +1,6 @@
 """ Author: Justin Galvez
     Name: main.py
-    Description:
+    Description: Provides the core logic for a text-based chess game.
 """
 
 from board import *
